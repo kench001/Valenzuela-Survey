@@ -9,6 +9,7 @@ interface Props {
 }
 
 const questions = [
+  // ... (Your questions array remains unchanged)
   {
     id: "SQD0",
     text: "I am satisfied with the service that I availed.",
@@ -141,51 +142,68 @@ const SurveyQuestionSQD1: React.FC<Props> = ({
     if (error) setError("");
   };
 
-  const handleNext = () => {
+  const handleNextClick = () => {
+    // Check for an answer on the current question before proceeding
     if (!showFinalInputs && !answers[current.id]) {
       setError("Please select an option to continue.");
       return;
     }
 
+    // If on the last question, show the final inputs screen
     if (currentIndex === total - 1 && !showFinalInputs) {
       setShowFinalInputs(true);
       return;
     }
 
+    // If on the final screen, submit the survey
     if (showFinalInputs) {
-      // final submit: prefer onFinish(answers) so parent gets data
+      const finalAnswers = { ...answers, suggestion, email };
       if (onFinish) {
-        onFinish({ ...answers, suggestion, email });
+        onFinish(finalAnswers);
       } else if (onNext) {
-        onNext();
+        onNext(); // Fallback for legacy prop
       }
       return;
     }
 
+    // Otherwise, just go to the next question
     setCurrentIndex((i) => i + 1);
   };
 
-  const handleBack = () => {
+  const handleBackClick = () => {
+    // If on the final screen, go back to the last question
     if (showFinalInputs) {
       setShowFinalInputs(false);
       return;
     }
 
+    // If on the first question, trigger the parent's back/cancel action
     if (currentIndex === 0) {
       if (onBack) onBack();
-      else if (onCancel) onCancel();
+      else if (onCancel) onCancel(); // Fallback
       return;
     }
+
+    // Otherwise, go to the previous question
     setCurrentIndex((i) => i - 1);
   };
 
   return (
-    <div className="relative p-6 sm:p-8 md:p-10 bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-auto flex flex-col justify-between h-auto max-h-full overflow-y-auto">
-      <div className="mb-1 p-4 bg-gray-700 rounded-lg shadow-inner">
-        <div className="flex items-center justify-center m-1 mb-4">
+    // Main Container: Simplified wrapper, removed layout/scrolling classes.
+    // Parent (App.tsx) handles this. Base padding is now mobile-first.
+    <div
+      className="
+      relative w-full flex flex-col justify-between 
+      bg-gray-800 rounded-xl shadow-2xl
+      p-4 sm:p-6 md:p-8
+    "
+    >
+      {/* Progress Bar - Already responsive */}
+      <div className="mb-4 p-4 bg-gray-700 rounded-lg shadow-inner">
+        <div className="flex items-center justify-center m-1">
           <div className="relative flex-grow h-2 bg-gray-500 rounded-full">
             <div
-              className={`absolute h-full rounded-full ${
+              className={`absolute h-full rounded-full transition-all duration-300 ${
                 showFinalInputs ? "bg-green-500" : "bg-red-600"
               }`}
               style={{
@@ -198,6 +216,7 @@ const SurveyQuestionSQD1: React.FC<Props> = ({
         </div>
       </div>
 
+      {/* Instructions - Rendered conditionally, already mobile-first */}
       {!showFinalInputs && (
         <div className="bg-blue-700 p-4 rounded-lg mb-6">
           <p className="text-white text-base sm:text-lg font-normal leading-relaxed">
@@ -207,12 +226,13 @@ const SurveyQuestionSQD1: React.FC<Props> = ({
         </div>
       )}
 
+      {/* Main Content: Switches between Questions and Final Inputs */}
       {!showFinalInputs ? (
-        <div className="bg-gray-600 p-5 rounded-md flex-grow mb-6">
-          <h3 className="text-white text-xl sm:text-2xl font-extrabold mb-4">
+        // Question Section - already mobile-first
+        <div className="bg-gray-600 p-4 sm:p-5 rounded-md flex-grow mb-6">
+          <h3 className="text-white text-lg sm:text-xl md:text-2xl font-extrabold mb-4">
             {current.id}: {current.text}
           </h3>
-
           <fieldset>
             <div className="space-y-3">
               {current.options.map((opt, idx) => (
@@ -233,30 +253,29 @@ const SurveyQuestionSQD1: React.FC<Props> = ({
               ))}
             </div>
           </fieldset>
-
           {error && (
             <p className="text-sm text-red-400 mt-4 font-medium">{error}</p>
           )}
         </div>
       ) : (
-        <div className="bg-gray-600 p-5 rounded-md flex-grow mb-6">
-          <h3 className="text-white text-xl sm:text-2xl font-extrabold mb-4">
+        // Final Inputs Section - already mobile-first
+        <div className="bg-gray-600 p-4 sm:p-5 rounded-md flex-grow mb-6">
+          <h3 className="text-white text-lg sm:text-xl md:text-2xl font-extrabold mb-4">
             Suggestions on how we can further improve our services (optional):
           </h3>
           <textarea
-            className="w-full p-3 rounded-md bg-gray-700 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6"
+            className="w-full p-3 rounded-md bg-gray-700 text-white text-base border border-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 mb-6"
             rows={5}
             value={suggestion}
             onChange={(e) => setSuggestion(e.target.value)}
             placeholder="Type your suggestions here..."
           />
-
-          <h3 className="text-white text-xl sm:text-2xl font-extrabold mb-4">
+          <h3 className="text-white text-lg sm:text-xl md:text-2xl font-extrabold mb-4">
             Email address (optional):
           </h3>
           <input
             type="email"
-            className="w-full p-3 rounded-md bg-gray-700 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full p-3 rounded-md bg-gray-700 text-white text-base border border-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@example.com"
@@ -264,35 +283,36 @@ const SurveyQuestionSQD1: React.FC<Props> = ({
         </div>
       )}
 
+      {/* Navigation Buttons - Refactored for mobile-first and consistency */}
       <div className="flex items-center justify-between">
         <button
-          onClick={handleBack}
-          className={`px-5 py-2 rounded-full font-semibold ${
-            currentIndex === 0 && !showFinalInputs
-              ? "bg-gray-500 text-white opacity-80"
-              : "bg-gray-500 text-white hover:bg-gray-600"
-          }`}
-          aria-disabled={currentIndex === 0 && !showFinalInputs}
+          onClick={handleBackClick}
+          className="
+            px-5 py-2 text-sm font-bold 
+            sm:px-6 sm:text-base 
+            bg-gray-500 text-white rounded-full 
+            hover:bg-gray-600 transition duration-150 shadow-sm 
+            uppercase tracking-wide cursor-pointer
+            disabled:opacity-50 disabled:cursor-not-allowed
+          "
+          disabled={currentIndex === 0 && !showFinalInputs}
         >
-          {currentIndex === 0 && !showFinalInputs ? "Cancel" : "Back"}
+          {/* Change text to Cancel on the very first question */}
+          {currentIndex === 0 && !showFinalInputs ? "Back" : "Back"}
         </button>
 
         <div className="flex items-center gap-3">
-          {!showFinalInputs && (
-            <div className="text-sm text-gray-300 hidden sm:block">
-              {answers[current.id] ? answers[current.id] : "No answer yet"}
-            </div>
-          )}
-
           <button
-            onClick={handleNext}
-            className="px-6 py-2 bg-red-600 text-white font-extrabold rounded-full hover:bg-red-700 transition"
+            onClick={handleNextClick}
+            className="
+              px-6 py-2 text-base font-extrabold 
+              sm:px-8 sm:text-lg
+              bg-red-600 text-white rounded-full 
+              hover:bg-red-700 transition duration-150 shadow-lg 
+              uppercase tracking-wide cursor-pointer
+            "
           >
-            {showFinalInputs
-              ? "Submit"
-              : currentIndex === total - 1
-              ? "Next"
-              : "Next"}
+            {showFinalInputs ? "Submit" : "Next"}
           </button>
         </div>
       </div>

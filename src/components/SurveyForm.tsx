@@ -50,22 +50,39 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
   const handleLocalNext = () => {
     if (validate()) onNext();
     else {
+      // Find the first element with an error and focus it
       const firstKey = Object.keys(errors)[0];
-      const el = firstKey
-        ? document.querySelector(`[name="${firstKey}"]`)
-        : null;
-      (el as HTMLElement | null)?.focus();
+      if (firstKey) {
+        (
+          document.querySelector(`[name="${firstKey}"]`) as HTMLElement
+        )?.focus();
+      }
     }
   };
 
   return (
-    <div className="relative p-4 sm:p-6 md:p-8 lg:p-10 bg-gray-800 rounded-lg sm:rounded-xl shadow-2xl w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto my-auto flex flex-col justify-between h-auto max-h-[85vh] overflow-y-auto">
+    // This is the main "card".
+    // REMOVED: max-w-*, mx-auto, my-auto. It should be w-full to fill its parent.
+    // The App.tsx wrapper already handles centering and max-width.
+    <div
+      className="
+      relative w-full h-auto max-h-[85vh] overflow-y-auto 
+      flex flex-col justify-between 
+      bg-gray-800 shadow-2xl 
+      p-4 sm:p-6 md:p-8 
+      rounded-lg sm:rounded-xl
+    "
+    >
+      {/* This internal spacing is already perfectly mobile-first. 
+        'space-y-3' is the mobile default.
+      */}
       <div className="space-y-3 sm:space-y-5 md:space-y-6 flex-grow">
         {/* Client Type */}
-        <div className="bg-gray-600 my-2 p-3 sm:p-4 rounded-lg">
+        <div className="bg-gray-600 p-3 sm:p-4 rounded-lg">
           <label className="block text-white text-sm sm:text-base md:text-lg font-bold mb-2">
             Client Type:
           </label>
+          {/* This flex-wrap is a perfect mobile-first pattern. */}
           <div className="flex flex-wrap gap-x-3 gap-y-2">
             <label className="inline-flex items-center">
               <input
@@ -93,6 +110,7 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
                 Business
               </span>
             </label>
+            {/* This w-full sm:w-auto is also excellent mobile-first styling. */}
             <label className="inline-flex items-center w-full sm:w-auto">
               <input
                 type="radio"
@@ -115,7 +133,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         {/* Date and Sex */}
-        <div className="grid my-2 grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gray-600 p-3 sm:p-4 rounded-lg">
+        {/* 'grid-cols-1' is the mobile default, 'md:grid-cols-2' is for larger. Perfect. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gray-600 p-3 sm:p-4 rounded-lg">
           <div>
             <label
               htmlFor="date"
@@ -130,7 +149,7 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               value={form.date}
               onChange={handleChange}
               max={today}
-              className={`form-input mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base md:text-lg bg-gray-700 text-white ${
+              className={`form-input mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
                 errors.date ? "border-red-400" : "border-gray-500"
               }`}
             />
@@ -181,7 +200,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         {/* Age and Region */}
-        <div className="grid grid-cols-1 my-2 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gray-600 sm:p-4 rounded-lg">
+        {/* Standardized padding to p-3 base for mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gray-600 p-3 sm:p-4 rounded-lg">
           <div>
             <label
               htmlFor="age"
@@ -194,7 +214,7 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               name="age"
               value={form.age}
               onChange={handleChange}
-              className={`form-select mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base md:text-lg bg-gray-700 text-white ${
+              className={`form-select mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
                 errors.age ? "border-red-400" : "border-gray-500"
               }`}
             >
@@ -224,7 +244,7 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               name="region"
               value={form.region}
               onChange={handleChange}
-              className={`form-input mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base md:text-lg bg-gray-700 text-white ${
+              className={`form-input mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
                 errors.region ? "border-red-400" : "border-gray-500"
               }`}
               placeholder="e.g., Metropolitan Manila"
@@ -238,7 +258,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         {/* Service Availed */}
-        <div className="bg-gray-600 p-2 sm:p-4 rounded-lg">
+        {/* Standardized padding to p-3 base for mobile */}
+        <div className="bg-gray-600 p-3 sm:p-4 rounded-lg">
           <label
             htmlFor="service"
             className="mb-1 block text-white text-sm sm:text-base md:text-lg font-bold"
@@ -248,10 +269,11 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
           <textarea
             id="service"
             name="service"
-            rows={1}
+            // `rows` is not needed since you set height 'h-16'
             value={form.service}
             onChange={handleChange}
-            className={`form-textarea mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md shadow-sm text-sm sm:text-base md:text-lg bg-gray-700 text-white ${
+            // Base height 'h-16' is mobile, scales up from there. Good.
+            className={`form-textarea mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
               errors.service ? "border-red-400" : "border-gray-500"
             } h-16 sm:h-20 md:h-24`}
             placeholder="Describe the service you availed"
@@ -264,6 +286,7 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
       </div>
 
+      {/* Button sizing is also perfectly mobile-first */}
       <div className="mt-3 sm:mt-4 flex justify-end">
         <button
           type="button"
@@ -310,7 +333,7 @@ const SurveyForm: React.FC = () => {
         return (
           <SurveyQuestionSQD1
             onFinish={(answers) => handleSubmitSurvey(answers)}
-            onNext={() => handleSubmitSurvey()} // fallback if SQD1 calls onNext instead of onFinish
+            onNext={() => handleSubmitSurvey()} // fallback
             onBack={handleBack}
             onCancel={handleBack}
           />
@@ -320,11 +343,11 @@ const SurveyForm: React.FC = () => {
     }
   };
 
-  return (
-    <div className="w-full max-w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto px-3 sm:px-4">
-      {renderCurrentQuestion()}
-    </div>
-  );
+  // REMOVED: The wrapper div with max-w-* and px-*.
+  // This component's only job is to render the current step.
+  // The layout (padding, max-width) is handled by App.tsx.
+  // The card styling (bg, padding) is handled by InitialSurveyDetails.
+  return renderCurrentQuestion();
 };
 
 export default SurveyForm;

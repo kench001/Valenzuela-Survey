@@ -22,9 +22,20 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
   };
 
   return (
-    <div className="relative p-6 sm:p-8 md:p-10 bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl mx-auto my-auto flex flex-col justify-between h-auto max-h-full overflow-y-auto">
-      {/* Top section with sliders - Red indicating current position */}
-      <div className="mb-1 p-4 bg-gray-700 rounded-lg shadow-inner">
+    // Main Container:
+    // REMOVED max-w-5xl, mx-auto, my-auto, max-h-full, overflow-y-auto.
+    // This component should be w-full and let the PAGE scroll, not the card.
+    // The parent (App.tsx) already handles max-width and centering.
+    // Adjusted base padding to p-4 for better mobile fit.
+    <div
+      className="
+      relative w-full flex flex-col justify-between 
+      bg-gray-800 rounded-xl shadow-2xl
+      p-4 sm:p-6 md:p-8
+    "
+    >
+      {/* Top section with sliders - This is already responsive */}
+      <div className="mb-4 p-4 bg-gray-700 rounded-lg shadow-inner">
         <div className="flex items-center justify-center space-x-4 m-1 mb-4">
           <div className="relative flex-grow h-2 bg-gray-500 rounded-full">
             {/* Slider track - Current (CC1) is at the start */}
@@ -52,7 +63,7 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
         </div>
       </div>
 
-      {/* Instructions */}
+      {/* Instructions - This is already perfect mobile-first */}
       <div className="bg-blue-700 p-4 rounded-lg mb-6">
         <p className="text-white text-base sm:text-lg font-normal leading-relaxed">
           <span className="font-bold">INSTRUCTIONS:</span> Please place a{" "}
@@ -64,7 +75,7 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
         </p>
       </div>
 
-      {/* Question CC1 */}
+      {/* Question CC1 - This is already perfect mobile-first */}
       <div className="bg-gray-600 p-4 rounded-lg flex-grow">
         <h3 className="text-white text-xl sm:text-2xl font-extrabold mb-4">
           CC1{" "}
@@ -130,21 +141,32 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
         {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
       </div>
 
-      {/* Back and Next Buttons */}
+      {/* Back and Next Buttons - Standardized mobile-first sizes */}
       <div className="mt-6 flex justify-between">
         <button
           onClick={onBack}
           disabled={!onBack}
-          className={`px-6 py-2 bg-gray-500 text-white font-bold rounded-full hover:bg-gray-600 transition duration-150 shadow-sm uppercase tracking-wide cursor-pointer ${
-            !onBack ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`
+            px-5 py-2 text-sm font-bold 
+            sm:px-6 sm:text-base 
+            bg-gray-500 text-white rounded-full 
+            hover:bg-gray-600 transition duration-150 shadow-sm 
+            uppercase tracking-wide cursor-pointer 
+            ${!onBack ? "opacity-50 cursor-not-allowed" : ""}
+          `}
         >
           Back
         </button>
 
         <button
           onClick={handleNext}
-          className="px-8 py-2 bg-red-600 text-white font-extrabold text-xl rounded-full hover:bg-red-700 transition duration-150 shadow-lg uppercase tracking-wide cursor-pointer"
+          className="
+            px-6 py-2 text-base font-extrabold 
+            sm:px-8 sm:text-lg
+            bg-red-600 text-white rounded-full 
+            hover:bg-red-700 transition duration-150 shadow-lg 
+            uppercase tracking-wide cursor-pointer
+          "
         >
           Next
         </button>
