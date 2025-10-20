@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface SurveyQuestionCC2Props {
   onNext: () => void;
@@ -12,6 +12,9 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
   onNext,
   onBack,
 }) => {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
+
   return (
     // Main Container:
     // REMOVED max-w-5xl, mx-auto, my-auto, max-h-full, overflow-y-auto.
@@ -57,12 +60,11 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
       {/* Instructions - This is already perfect mobile-first */}
       <div className="bg-blue-700 p-4 rounded-lg mb-6">
         <p className="text-white text-base sm:text-lg font-normal leading-relaxed">
-          <span className="font-bold">INSTRUCTIONS:</span> Please place a{" "}
-          <span className="font-bold">Check mark (✓)</span> in the designated
-          box that corresponds to your answer on the Citizen's Charter (CC)
-          questions. The Citizen's Charter is an official document that reflects
-          the services of a government agency/office including its requirements,
-          fees, and processing times among others.
+          <span className="font-bold">INSTRUCTIONS:</span> Please choose in the
+          designated choices that corresponds to your answer on the Citizen's
+          Charter (CC) questions. The Citizen's Charter is an official document
+          that reflects the services of a government agency/office including its
+          requirements, fees, and processing times among others.
         </p>
       </div>
 
@@ -80,8 +82,14 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
             <input
               type="radio"
               name="cc2"
+              required
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="1"
+              checked={selected === "1"}
+              onChange={() => {
+                setSelected("1");
+                setTouched(true);
+              }}
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               1. Easy to see
@@ -93,6 +101,11 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
               name="cc2"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="2"
+              checked={selected === "2"}
+              onChange={() => {
+                setSelected("2");
+                setTouched(true);
+              }}
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               2. Somewhat easy to see
@@ -104,6 +117,11 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
               name="cc2"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="3"
+              checked={selected === "3"}
+              onChange={() => {
+                setSelected("3");
+                setTouched(true);
+              }}
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               3. Difficult to see
@@ -115,6 +133,11 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
               name="cc2"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="4"
+              checked={selected === "4"}
+              onChange={() => {
+                setSelected("4");
+                setTouched(true);
+              }}
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               4. Not visible at all
@@ -126,12 +149,23 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
               name="cc2"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="5"
+              checked={selected === "5"}
+              onChange={() => {
+                setSelected("5");
+                setTouched(true);
+              }}
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               5. Not Applicable
             </span>
           </label>
         </div>
+
+        {touched && !selected && (
+          <p className="text-red-300 mt-3 text-sm" role="alert">
+            Please select an option before continuing.
+          </p>
+        )}
       </div>
 
       {/* Navigation Buttons - Standardized mobile-first sizes */}
@@ -149,14 +183,21 @@ const SurveyQuestionCC2: React.FC<SurveyQuestionCC2Props> = ({
           Back
         </button>
         <button
-          onClick={onNext}
-          className="
+          onClick={() => {
+            setTouched(true);
+            if (selected) {
+              onNext();
+            }
+          }}
+          disabled={!selected}
+          className={`
             px-6 py-2 text-base font-extrabold 
             sm:px-8 sm:text-lg
             bg-red-600 text-white rounded-full 
             hover:bg-red-700 transition duration-150 shadow-lg 
             uppercase tracking-wide cursor-pointer
-          "
+            ${!selected ? "opacity-50 cursor-not-allowed hover:bg-red-600" : ""}
+          `}
         >
           Next
         </button>

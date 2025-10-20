@@ -38,27 +38,22 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
       <div className="mb-4 p-4 bg-gray-700 rounded-lg shadow-inner">
         <div className="flex items-center justify-center space-x-4 m-1 mb-4">
           <div className="relative flex-grow h-2 bg-gray-500 rounded-full">
-            {/* Slider track - Current (CC1) is at the start */}
             <div
               className="absolute h-full bg-red-600 rounded-full"
               style={{ width: "10%" }}
             ></div>{" "}
-            {/* Indicate CC1 progress */}
             <div
               className="absolute -ml-2 w-5 h-5 bg-red-600 rounded-full shadow border-2 border-red-600 cursor-pointer"
               style={{ left: "10%" }}
             ></div>{" "}
-            {/* Current dot */}
             <div
               className="absolute -ml-2 w-5 h-5 bg-white rounded-full shadow border-2 border-gray-400 cursor-pointer"
               style={{ left: "50%" }}
             ></div>{" "}
-            {/* Future dot */}
             <div
               className="absolute -ml-2 w-5 h-5 bg-white rounded-full shadow border-2 border-gray-400 cursor-pointer"
               style={{ left: "90%" }}
             ></div>{" "}
-            {/* Future dot */}
           </div>
         </div>
       </div>
@@ -66,17 +61,22 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
       {/* Instructions - This is already perfect mobile-first */}
       <div className="bg-blue-700 p-4 rounded-lg mb-6">
         <p className="text-white text-base sm:text-lg font-normal leading-relaxed">
-          <span className="font-bold">INSTRUCTIONS:</span> Please place a{" "}
-          <span className="font-bold">Check mark (✓)</span> in the designated
-          box that corresponds to your answer on the Citizen's Charter (CC)
-          questions. The Citizen's Charter is an official document that reflects
-          the services of a government agency/office including its requirements,
-          fees, and processing times among others.
+          <span className="font-bold">INSTRUCTIONS:</span> Please choose in the
+          designated choices that corresponds to your answer on the Citizen's
+          Charter (CC) questions. The Citizen's Charter is an official document
+          that reflects the services of a government agency/office including its
+          requirements, fees, and processing times among others.
         </p>
       </div>
 
       {/* Question CC1 - This is already perfect mobile-first */}
-      <div className="bg-gray-600 p-4 rounded-lg flex-grow">
+      <div
+        className="bg-gray-600 p-4 rounded-lg flex-grow"
+        role="radiogroup"
+        aria-required="true"
+        aria-invalid={!!error}
+        aria-label="CC1 awareness"
+      >
         <h3 className="text-white text-xl sm:text-2xl font-extrabold mb-4">
           CC1{" "}
           <span className="font-normal">
@@ -92,6 +92,7 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
               value="1"
               checked={selected === "1"}
               onChange={() => setSelected("1")}
+              required
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               1. I know what a CC is and I saw this office's CC.
@@ -160,13 +161,16 @@ const SurveyQuestionCC1: React.FC<SurveyQuestionCC1Props> = ({
 
         <button
           onClick={handleNext}
-          className="
+          disabled={!selected}
+          aria-disabled={!selected}
+          className={`
             px-6 py-2 text-base font-extrabold 
             sm:px-8 sm:text-lg
             bg-red-600 text-white rounded-full 
             hover:bg-red-700 transition duration-150 shadow-lg 
             uppercase tracking-wide cursor-pointer
-          "
+            ${!selected ? "opacity-50 cursor-not-allowed" : ""}
+          `}
         >
           Next
         </button>

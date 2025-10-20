@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface SurveyQuestionCC3Props {
   onNext: () => void;
@@ -12,6 +12,7 @@ const SurveyQuestionCC3: React.FC<SurveyQuestionCC3Props> = ({
   onNext,
   onBack,
 }) => {
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
   return (
     // Main Container:
     // REMOVED max-w-5xl, mx-auto, my-auto, max-h-full, overflow-y-auto.
@@ -57,12 +58,11 @@ const SurveyQuestionCC3: React.FC<SurveyQuestionCC3Props> = ({
       {/* Instructions - This is already perfect mobile-first */}
       <div className="bg-blue-700 p-4 rounded-lg mb-6">
         <p className="text-white text-base sm:text-lg font-normal leading-relaxed">
-          <span className="font-bold">INSTRUCTIONS:</span> Please place a{" "}
-          <span className="font-bold">Check mark (✓)</span> in the designated
-          box that corresponds to your answer on the Citizen's Charter (CC)
-          questions. The Citizen's Charter is an official document that reflects
-          the services of a government agency/office including its requirements,
-          fees, and processing times among others.
+          <span className="font-bold">INSTRUCTIONS:</span> Please place choose
+          in the designated choices that corresponds to your answer on the
+          Citizen's Charter (CC) questions. The Citizen's Charter is an official
+          document that reflects the services of a government agency/office
+          including its requirements, fees, and processing times among others.
         </p>
       </div>
 
@@ -82,6 +82,10 @@ const SurveyQuestionCC3: React.FC<SurveyQuestionCC3Props> = ({
               name="cc3"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="1"
+              checked={selectedValue === "1"}
+              onChange={(e) => setSelectedValue(e.target.value)}
+              required
+              aria-required="true"
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               1. Helped very much
@@ -93,6 +97,10 @@ const SurveyQuestionCC3: React.FC<SurveyQuestionCC3Props> = ({
               name="cc3"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="2"
+              checked={selectedValue === "2"}
+              onChange={(e) => setSelectedValue(e.target.value)}
+              required
+              aria-required="true"
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               2. Somewhat helped
@@ -104,6 +112,10 @@ const SurveyQuestionCC3: React.FC<SurveyQuestionCC3Props> = ({
               name="cc3"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="3"
+              checked={selectedValue === "3"}
+              onChange={(e) => setSelectedValue(e.target.value)}
+              required
+              aria-required="true"
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               3. Did not help
@@ -115,6 +127,10 @@ const SurveyQuestionCC3: React.FC<SurveyQuestionCC3Props> = ({
               name="cc3"
               className="form-radio h-5 w-5 text-red-600 bg-gray-700 border-gray-500"
               value="4"
+              checked={selectedValue === "4"}
+              onChange={(e) => setSelectedValue(e.target.value)}
+              required
+              aria-required="true"
             />
             <span className="ml-3 text-white text-base sm:text-lg">
               4. Not Applicable
@@ -138,14 +154,15 @@ const SurveyQuestionCC3: React.FC<SurveyQuestionCC3Props> = ({
           Back
         </button>
         <button
-          onClick={onNext}
-          className="
-            px-6 py-2 text-base font-extrabold 
-            sm:px-8 sm:text-lg
-            bg-red-600 text-white rounded-full 
-            hover:bg-red-700 transition duration-150 shadow-lg 
-            uppercase tracking-wide cursor-pointer
-          "
+          onClick={() => {
+            if (selectedValue) onNext();
+          }}
+          disabled={!selectedValue}
+          className={`px-6 py-2 text-base font-extrabold sm:px-8 sm:text-lg bg-red-600 text-white rounded-full hover:bg-red-700 transition duration-150 shadow-lg uppercase tracking-wide ${
+            !selectedValue
+              ? "opacity-50 cursor-not-allowed hover:bg-red-600"
+              : "cursor-pointer"
+          }`}
         >
           Next
         </button>

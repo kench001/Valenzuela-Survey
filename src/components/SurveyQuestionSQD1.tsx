@@ -220,8 +220,8 @@ const SurveyQuestionSQD1: React.FC<Props> = ({
       {!showFinalInputs && (
         <div className="bg-blue-700 p-4 rounded-lg mb-6">
           <p className="text-white text-base sm:text-lg font-normal leading-relaxed">
-            INSTRUCTIONS: Please put a check mark (✓) on the option that best
-            corresponds to your answer.
+            INSTRUCTIONS: Please choose on the option that best corresponds to
+            your answer.
           </p>
         </div>
       )}
