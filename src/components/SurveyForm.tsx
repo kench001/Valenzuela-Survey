@@ -62,27 +62,27 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
 
   return (
     // This is the main "card".
-    // REMOVED: max-w-*, mx-auto, my-auto. It should be w-full to fill its parent.
-    // The App.tsx wrapper already handles centering and max-width.
+    // REMOVED: max-h-[85vh] and overflow-y-auto to prevent internal scrolling.
+    // The page itself will scroll if needed, which is correct.
+    // REDUCED: Padding from p-4 to p-3 (mobile) and up.
     <div
       className="
-      relative w-full h-auto max-h-[85vh] overflow-y-auto 
+      relative w-full h-auto
       flex flex-col justify-between 
       bg-gray-800 shadow-2xl 
-      p-4 sm:p-6 md:p-8 
+      p-3 sm:p-5 md:p-6 
       rounded-lg sm:rounded-xl
     "
     >
-      {/* This internal spacing is already perfectly mobile-first. 
-        'space-y-3' is the mobile default.
-      */}
-      <div className="space-y-3 sm:space-y-5 md:space-y-6 flex-grow">
+      {/* REDUCED: Spacing from space-y-3 to space-y-2 (mobile) and up. */}
+      <div className="space-y-2 sm:space-y-4 md:space-y-5 flex-grow">
         {/* Client Type */}
-        <div className="bg-gray-600 p-3 sm:p-4 rounded-lg">
-          <label className="block text-white text-sm sm:text-base md:text-lg font-bold mb-2">
+        {/* REDUCED: Padding from p-3 to p-2 (mobile) and up. */}
+        <div className="bg-gray-600 p-2 sm:p-3 rounded-lg">
+          {/* REDUCED: Margin from mb-2 to mb-1.5 */}
+          <label className="block text-white text-sm sm:text-base md:text-lg font-bold mb-1.5">
             Client Type:
           </label>
-          {/* This flex-wrap is a perfect mobile-first pattern. */}
           <div className="flex flex-wrap gap-x-3 gap-y-2">
             <label className="inline-flex items-center">
               <input
@@ -110,7 +110,6 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
                 Business
               </span>
             </label>
-            {/* This w-full sm:w-auto is also excellent mobile-first styling. */}
             <label className="inline-flex items-center w-full sm:w-auto">
               <input
                 type="radio"
@@ -126,19 +125,21 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
             </label>
           </div>
           {errors.clientType && (
-            <p className="text-xs sm:text-sm text-red-400 mt-2">
+            // REDUCED: Margin from mt-2 to mt-1.5
+            <p className="text-xs sm:text-sm text-red-400 mt-1.5">
               {errors.clientType}
             </p>
           )}
         </div>
 
         {/* Date and Sex */}
-        {/* 'grid-cols-1' is the mobile default, 'md:grid-cols-2' is for larger. Perfect. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gray-600 p-3 sm:p-4 rounded-lg">
+        {/* REDUCED: Padding, Gap */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4 bg-gray-600 p-2 sm:p-3 rounded-lg">
           <div>
             <label
               htmlFor="date"
-              className="block text-white text-sm sm:text-base md:text-lg font-bold mb-2"
+              // REDUCED: Margin from mb-2 to mb-1.5
+              className="block text-white text-sm sm:text-base md:text-lg font-bold mb-1.5"
             >
               Date:
             </label>
@@ -149,21 +150,25 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               value={form.date}
               onChange={handleChange}
               max={today}
-              className={`form-input mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
+              // REDUCED: Vertical padding from py-2 to py-1.5 (mobile)
+              className={`form-input mt-1 block w-full px-3 sm:px-4 py-1.5 sm:py-2 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
                 errors.date ? "border-red-400" : "border-gray-500"
               }`}
             />
             {errors.date && (
-              <p className="text-xs sm:text-sm text-red-400 mt-2">
+              // REDUCED: Margin from mt-2 to mt-1.5
+              <p className="text-xs sm:text-sm text-red-400 mt-1.5">
                 {errors.date}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-white text-sm sm:text-base md:text-lg font-bold mb-2">
+            {/* REDUCED: Margin from mb-2 to mb-1.5 */}
+            <label className="block text-white text-sm sm:text-base md:text-lg font-bold mb-1.5">
               Sex:
             </label>
-            <div className="flex gap-4 mt-2">
+            {/* REDUCED: Margin from mt-2 to mt-1.5 */}
+            <div className="flex gap-4 mt-1.5">
               <label className="inline-flex items-center">
                 <input
                   type="radio"
@@ -192,7 +197,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               </label>
             </div>
             {errors.sex && (
-              <p className="text-xs sm:text-sm text-red-400 mt-2">
+              // REDUCED: Margin from mt-2 to mt-1.5
+              <p className="text-xs sm:text-sm text-red-400 mt-1.5">
                 {errors.sex}
               </p>
             )}
@@ -200,12 +206,13 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         {/* Age and Region */}
-        {/* Standardized padding to p-3 base for mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 bg-gray-600 p-3 sm:p-4 rounded-lg">
+        {/* REDUCED: Padding, Gap */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4 bg-gray-600 p-2 sm:p-3 rounded-lg">
           <div>
             <label
               htmlFor="age"
-              className="block text-white text-sm sm:text-base md:text-lg font-bold mb-2"
+              // REDUCED: Margin from mb-2 to mb-1.5
+              className="block text-white text-sm sm:text-base md:text-lg font-bold mb-1.5"
             >
               Age:
             </label>
@@ -214,7 +221,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               name="age"
               value={form.age}
               onChange={handleChange}
-              className={`form-select mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
+              // REDUCED: Vertical padding from py-2 to py-1.5 (mobile)
+              className={`form-select mt-1 block w-full px-3 sm:px-4 py-1.5 sm:py-2 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
                 errors.age ? "border-red-400" : "border-gray-500"
               }`}
             >
@@ -226,7 +234,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               <option value="55+">55+</option>
             </select>
             {errors.age && (
-              <p className="text-xs sm:text-sm text-red-400 mt-2">
+              // REDUCED: Margin from mt-2 to mt-1.5
+              <p className="text-xs sm:text-sm text-red-400 mt-1.5">
                 {errors.age}
               </p>
             )}
@@ -234,7 +243,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
           <div>
             <label
               htmlFor="region"
-              className="block text-white text-sm sm:text-base md:text-lg font-bold mb-2"
+              // REDUCED: Margin from mb-2 to mb-1.5
+              className="block text-white text-sm sm:text-base md:text-lg font-bold mb-1.5"
             >
               Region of Residence:
             </label>
@@ -244,13 +254,15 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
               name="region"
               value={form.region}
               onChange={handleChange}
-              className={`form-input mt-1 block w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
+              // REDUCED: Vertical padding from py-2 to py-1.5 (mobile)
+              className={`form-input mt-1 block w-full px-3 sm:px-4 py-1.5 sm:py-2 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
                 errors.region ? "border-red-400" : "border-gray-500"
               }`}
               placeholder="e.g., Metropolitan Manila"
             />
             {errors.region && (
-              <p className="text-xs sm:text-sm text-red-400 mt-2">
+              // REDUCED: Margin from mt-2 to mt-1.5
+              <p className="text-xs sm:text-sm text-red-400 mt-1.5">
                 {errors.region}
               </p>
             )}
@@ -258,8 +270,8 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
         </div>
 
         {/* Service Availed */}
-        {/* Standardized padding to p-3 base for mobile */}
-        <div className="bg-gray-600 p-3 sm:p-4 rounded-lg">
+        {/* REDUCED: Padding */}
+        <div className="bg-gray-600 p-2 sm:p-3 rounded-lg">
           <label
             htmlFor="service"
             className="mb-1 block text-white text-sm sm:text-base md:text-lg font-bold"
@@ -269,29 +281,29 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
           <textarea
             id="service"
             name="service"
-            // `rows` is not needed since you set height 'h-16'
             value={form.service}
             onChange={handleChange}
-            // Base height 'h-16' is mobile, scales up from there. Good.
-            className={`form-textarea mt-1 block w-full px-3 sm:px-4 py-2 sm:py-3 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
+            // REDUCED: Vertical padding and height
+            className={`form-textarea mt-1 block w-full px-3 sm:px-4 py-1.5 sm:py-2 border rounded-md shadow-sm text-sm sm:text-base bg-gray-700 text-white ${
               errors.service ? "border-red-400" : "border-gray-500"
-            } h-16 sm:h-20 md:h-24`}
+            } h-14 sm:h-16 md:h-20`}
             placeholder="Describe the service you availed"
           />
           {errors.service && (
-            <p className="text-xs sm:text-sm text-red-400 mt-2">
+            // REDUCED: Margin from mt-2 to mt-1.5
+            <p className="text-xs sm:text-sm text-red-400 mt-1.5">
               {errors.service}
             </p>
           )}
         </div>
       </div>
 
-      {/* Button sizing is also perfectly mobile-first */}
-      <div className="mt-3 sm:mt-4 flex justify-end">
+      {/* REDUCED: Margin-top and button padding */}
+      <div className="mt-2 sm:mt-3 flex justify-end">
         <button
           type="button"
           onClick={handleLocalNext}
-          className="px-6 sm:px-8 md:px-10 py-2 sm:py-3 bg-red-600 text-white font-extrabold text-sm sm:text-base md:text-lg rounded-full hover:bg-red-700 transition duration-150 shadow-lg uppercase tracking-wide cursor-pointer"
+          className="px-6 sm:px-8 md:px-10 py-1.5 sm:py-2.5 bg-red-600 text-white font-extrabold text-sm sm:text-base md:text-lg rounded-full hover:bg-red-700 transition duration-150 shadow-lg uppercase tracking-wide cursor-pointer"
         >
           Next
         </button>
@@ -300,6 +312,7 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
   );
 };
 
+// ... The SurveyForm component remains unchanged
 const SurveyForm: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showThankYou, setShowThankYou] = useState(false);
@@ -343,10 +356,6 @@ const SurveyForm: React.FC = () => {
     }
   };
 
-  // REMOVED: The wrapper div with max-w-* and px-*.
-  // This component's only job is to render the current step.
-  // The layout (padding, max-width) is handled by App.tsx.
-  // The card styling (bg, padding) is handled by InitialSurveyDetails.
   return renderCurrentQuestion();
 };
 
