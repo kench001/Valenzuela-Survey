@@ -9,7 +9,9 @@ import { Analytics } from './components/Analytics';
 import { Settings } from './components/Settings';
 import { UserManagement } from './components/UserManagement';
 import AuthService, { AdminUser } from './services/authService';
-import logoImage from 'figma:asset/af81db3161d88598d5899e189bb64eb0b86eded2.png';
+
+// Use the same logo from the main app
+const logoImage = '/src/assets/valenzuela-logo.png';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
