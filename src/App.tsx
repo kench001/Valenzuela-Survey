@@ -1,8 +1,37 @@
 import "./App.css";
 import logo from "./assets/valenzuela-logo.png";
 import logo1 from "./assets/valenzuela-bg.jpg";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SurveyForm from "./components/SurveyForm";
+import DynamicSurveyForm from "./components/DynamicSurveyForm";
+import IntegratedLogin from "./components/IntegratedLogin";
+import IntegratedAdmin from "./components/IntegratedAdmin";
+import AuthService, { type AdminUser } from "./services/authService";
+
+// --- Admin Login Icon Component ---
+const AdminLoginIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    className="fixed top-4 right-4 z-50 bg-black/20 hover:bg-black/40 backdrop-blur-sm rounded-full p-3 transition-all duration-300 group"
+    title="Admin Login"
+  >
+    <svg
+      className="w-6 h-6 text-white group-hover:text-blue-300 transition-colors"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      />
+    </svg>
+  </button>
+);
+
+type AppView = 'survey' | 'login' | 'admin';
 
 // --- New Button Component (No Dependencies) ---
 
@@ -156,12 +185,50 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [showSurveyModal, setShowSurveyModal] = useState(false);
   const [showSurveyForm, setShowSurveyForm] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [currentView, setCurrentView] = useState<AppView>('survey');
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const headerBgClass = showSurveyForm ? "bg-black/40" : "bg-white";
   const headerTitleColorClass = showSurveyForm ? "text-white" : "text-gray-800";
   const headerSubtitleColorClass = showSurveyForm
     ? "text-white"
     : "text-gray-600";
+
+  // Listen for authentication state changes
+  useEffect(() => {
+    const unsubscribe = AuthService.onAuthStateChange((user, adminData) => {
+      if (user && adminData) {
+        setCurrentUser(adminData);
+        // Auto-redirect to admin if user is authenticated, unless they're on survey form intentionally
+        setCurrentView('admin');
+      } else {
+        setCurrentUser(null);
+        // Don't override login view - let users stay on login page
+        if (currentView !== 'survey' && currentView !== 'login') {
+          setCurrentView('survey');
+        }
+      }
+      setIsAuthLoading(false);
+    });
+
+    // Development helper: add global function to clear auth
+    if (import.meta.env.DEV) {
+      (window as any).clearAuth = async () => {
+        try {
+          await AuthService.logout();
+          console.log('Authentication cleared! Refreshing...');
+          window.location.reload();
+        } catch (error) {
+          console.error('Error clearing auth:', error);
+        }
+      };
+      console.log('🛠️ Dev mode: Use clearAuth() in console to start fresh');
+    }
+
+    return () => unsubscribe();
+  }, [currentView]);
 
   const handleTakeSurveyClick = () => {
     setShowSurveyModal(true);
@@ -173,6 +240,81 @@ function App() {
     setShowSurveyForm(true);
   };
 
+  const handleAdminLogin = () => {
+    // If already authenticated, go directly to admin dashboard
+    if (currentUser) {
+      setCurrentView('admin');
+    } else {
+      // Switch to integrated login view instead of navigating away
+      setCurrentView('login');
+    }
+  };
+
+  const handleLoginSuccess = (user: AdminUser) => {
+    setCurrentUser(user);
+    setCurrentView('admin');
+  };
+
+  const handleBackToSurvey = () => {
+    setCurrentView('survey');
+  };
+
+  const handleSurveyComplete = () => {
+    setShowSurveyForm(false);
+    setShowThankYou(true);
+  };
+
+  const handleThankYouClose = () => {
+    setShowThankYou(false);
+    setShowWelcome(true);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AuthService.logout();
+      setCurrentUser(null);
+      setCurrentView('survey');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if Firebase logout fails
+      setCurrentUser(null);
+      setCurrentView('survey');
+    }
+  };
+
+  // Show loading screen while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <h2 className="text-white text-xl font-semibold">Loading...</h2>
+          <p className="text-slate-400 mt-2">Please wait while we verify your session</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show Login Form
+  if (currentView === 'login') {
+    return (
+      <IntegratedLogin 
+        onLoginSuccess={handleLoginSuccess}
+        onBackToSurvey={handleBackToSurvey}
+      />
+    );
+  }
+
+  // Show Admin Dashboard  
+  if (currentView === 'admin' && currentUser) {
+    return (
+      <IntegratedAdmin 
+        currentUser={currentUser}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
   return (
     <div
       className={`relative min-h-screen flex flex-col`}
@@ -183,6 +325,9 @@ function App() {
       }}
     >
       <StyledButtonCSS />
+
+      {/* Admin Login Icon */}
+      <AdminLoginIcon onClick={handleAdminLogin} />
 
       {!showSurveyForm && (
         <div className="absolute inset-0 bg-blue-900/80 backdrop-blur-sm"></div>
@@ -268,7 +413,23 @@ function App() {
 
         {showSurveyForm && (
           <div className="relative z-30 w-full max-w-lg md:max-w-3xl lg:max-w-5xl mx-auto p-4 sm:p-6 md:p-8">
-            <SurveyForm />
+            <DynamicSurveyForm onComplete={handleSurveyComplete} />
+          </div>
+        )}
+
+        {showThankYou && (
+          <div className="relative z-30 px-4 text-center text-white mx-auto max-w-sm md:max-w-md lg:max-w-2xl py-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold">Thank You!</h1>
+            <div className="w-1/2 h-1 bg-white mx-auto my-4 md:my-6"></div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-4">Survey Completed</h2>
+            <p className="mt-6 sm:mt-8 text-base sm:text-xl md:text-2xl font-light">
+              Your responses have been successfully submitted. Thank you for your valuable feedback!
+            </p>
+            <div className="mt-8 sm:mt-10">
+              <Button color="#dc2626" onClick={handleThankYouClose}>
+                Back to Home
+              </Button>
+            </div>
           </div>
         )}
       </div>

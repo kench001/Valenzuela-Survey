@@ -1,11 +1,13 @@
 import React, { useState } from "react";
+import { db } from '../config/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import SurveyQuestionCC1 from "./SurveyQuestionCC1";
 import SurveyQuestionCC2 from "./SurveyQuestionCC2";
 import SurveyQuestionCC3 from "./SurveyQuestionCC3";
 import SurveyQuestionSQD1 from "./SurveyQuestionSQD1";
 import ThankYouPage from "./ThankYouPage";
 
-const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
+const InitialSurveyDetails: React.FC<{ onNext: (demographics: any) => void }> = ({ onNext }) => {
   const today = new Date().toISOString().split("T")[0];
   const [form, setForm] = useState({
     clientType: "",
@@ -48,7 +50,7 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
   };
 
   const handleLocalNext = () => {
-    if (validate()) onNext();
+    if (validate()) onNext(form);
     else {
       // Find the first element with an error and focus it
       const firstKey = Object.keys(errors)[0];
@@ -316,26 +318,88 @@ const InitialSurveyDetails: React.FC<{ onNext: () => void }> = ({ onNext }) => {
 const SurveyForm: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [surveyData, setSurveyData] = useState({
+    demographics: {} as any,
+    answers: {} as Record<string, string>
+  });
 
   const handleNext = () => setCurrentQuestion((prev) => prev + 1);
   const handleBack = () => setCurrentQuestion((prev) => Math.max(0, prev - 1));
 
-  const handleSubmitSurvey = (answers?: Record<string, string>) => {
-    console.log("Survey final answers:", answers ?? {});
-    setShowThankYou(true);
+  const handleDemographicsComplete = (demographics: any) => {
+    setSurveyData(prev => ({ ...prev, demographics }));
+    handleNext();
+  };
+
+  const handleSubmitSurvey = async (finalAnswers?: Record<string, string>) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Combine all answers
+      const allAnswers = { ...surveyData.answers, ...finalAnswers };
+      
+      // Prepare the response data
+      const responseData = {
+        surveyId: `citizen_satisfaction_${Date.now()}`,
+        submittedAt: serverTimestamp(),
+        demographics: {
+          age: surveyData.demographics.age || 'Unknown',
+          gender: surveyData.demographics.sex || 'Unknown',
+          barangay: surveyData.demographics.region || 'Unknown',
+          clientType: surveyData.demographics.clientType || 'Unknown',
+          service: surveyData.demographics.service || 'Unknown'
+        },
+        answers: allAnswers,
+        isComplete: true,
+        metadata: {
+          completedAt: new Date().toISOString(),
+          duration: 'Unknown', // Could be calculated if needed
+          device: 'web'
+        }
+      };
+
+      console.log("Submitting survey data:", responseData);
+      
+      // Save to Firestore
+      const docRef = await addDoc(collection(db, 'responses'), responseData);
+      console.log("Survey submitted successfully with ID:", docRef.id);
+      
+      setShowThankYou(true);
+    } catch (error) {
+      console.error("Error submitting survey:", error);
+      alert("There was an error submitting your survey. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const closeThankYou = () => {
     setShowThankYou(false);
     setCurrentQuestion(0);
+    setSurveyData({ demographics: {}, answers: {} });
   };
 
   const renderCurrentQuestion = () => {
+    if (isSubmitting) {
+      return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Submitting Survey...</h2>
+            <p className="text-gray-600">Please wait while we save your responses.</p>
+          </div>
+        </div>
+      );
+    }
+    
     if (showThankYou) return <ThankYouPage onClose={closeThankYou} />;
 
     switch (currentQuestion) {
       case 0:
-        return <InitialSurveyDetails onNext={handleNext} />;
+        return <InitialSurveyDetails onNext={handleDemographicsComplete} />;
       case 1:
         return <SurveyQuestionCC1 onNext={handleNext} onBack={handleBack} />;
       case 2:
@@ -352,7 +416,7 @@ const SurveyForm: React.FC = () => {
           />
         );
       default:
-        return <InitialSurveyDetails onNext={handleNext} />;
+        return <InitialSurveyDetails onNext={handleDemographicsComplete} />;
     }
   };
 
