@@ -43,6 +43,7 @@ export function SurveyManagement({ onNavigate }: SurveyManagementProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [showFormBuilder, setShowFormBuilder] = useState(false);
+  const [editingSurvey, setEditingSurvey] = useState<Survey | null>(null);
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [responses, setResponses] = useState<Response[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +133,22 @@ export function SurveyManagement({ onNavigate }: SurveyManagementProps) {
     }
   };
 
+  const handleEditSurvey = (survey: Survey) => {
+    setEditingSurvey(survey);
+    setShowFormBuilder(true);
+  };
+
+  const handleCreateNew = () => {
+    setEditingSurvey(null);
+    setShowFormBuilder(true);
+  };
+
+  const handleFormBuilderBack = () => {
+    setShowFormBuilder(false);
+    setEditingSurvey(null);
+    fetchSurveys(); // Refresh surveys list
+  };
+
   const filteredSurveys = surveys.filter(survey => {
     const matchesSearch = survey.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          survey.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -151,7 +168,12 @@ export function SurveyManagement({ onNavigate }: SurveyManagementProps) {
   }
 
   if (showFormBuilder) {
-    return <FormBuilder onBack={() => setShowFormBuilder(false)} />;
+    return (
+      <FormBuilder 
+        onBack={handleFormBuilderBack}
+        editingSurvey={editingSurvey}
+      />
+    );
   }
 
   return (
@@ -169,7 +191,7 @@ export function SurveyManagement({ onNavigate }: SurveyManagementProps) {
             Use Template
           </button>
           <button 
-            onClick={() => setShowFormBuilder(true)}
+            onClick={handleCreateNew}
             className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
@@ -301,7 +323,7 @@ export function SurveyManagement({ onNavigate }: SurveyManagementProps) {
                     </button>
                   )}
                   <button 
-                    onClick={() => setShowFormBuilder(true)}
+                    onClick={() => handleEditSurvey(survey)}
                     className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
                     title="Edit"
                   >

@@ -8,7 +8,8 @@ import {
   query,
   where,
   getDocs,
-  updateDoc
+  updateDoc,
+  doc
 } from 'firebase/firestore';
 import { 
   Plus, 
@@ -26,11 +27,13 @@ import {
   Phone,
   MapPin,
   User,
-  Hash
+  Hash,
+  Smile
 } from 'lucide-react';
 
 interface FormBuilderProps {
   onBack: () => void;
+  editingSurvey?: any;
 }
 
 interface Question {
@@ -41,19 +44,24 @@ interface Question {
   options?: string[];
 }
 
-export function FormBuilder({ onBack }: FormBuilderProps) {
-  const [surveyTitle, setSurveyTitle] = useState('New Survey');
-  const [surveyDescription, setSurveyDescription] = useState('');
-  const [surveyCategory, setSurveyCategory] = useState('general');
+export function FormBuilder({ onBack, editingSurvey }: FormBuilderProps) {
+  const [surveyTitle, setSurveyTitle] = useState(editingSurvey ? editingSurvey.title : 'New Survey');
+  const [surveyDescription, setSurveyDescription] = useState(editingSurvey ? editingSurvey.description : '');
+  const [surveyCategory, setSurveyCategory] = useState(editingSurvey ? editingSurvey.category : 'general');
   const [isSaving, setIsSaving] = useState(false);
-  const [questions, setQuestions] = useState<Question[]>([
-    { id: '1', type: 'text', label: 'What is your name?', required: true },
-    { id: '2', type: 'multiple-choice', label: 'How satisfied are you with our service?', required: true, options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'] }
-  ]);
+  const [questions, setQuestions] = useState<Question[]>(
+    editingSurvey && editingSurvey.questions ? 
+      editingSurvey.questions : 
+      [
+        { id: '1', type: 'text', label: 'What is your name?', required: true },
+        { id: '2', type: 'multiple-choice', label: 'How satisfied are you with our service?', required: true, options: ['Very Satisfied', 'Satisfied', 'Neutral', 'Dissatisfied'] }
+      ]
+  );
 
   const questionTypes = [
     { type: 'text', label: 'Text Input', icon: AlignLeft },
     { type: 'multiple-choice', label: 'Multiple Choice', icon: CheckSquare },
+    { type: 'likert-scale', label: 'Likert Scale (Emoji)', icon: Smile },
     { type: 'rating', label: 'Rating Scale', icon: Star },
     { type: 'date', label: 'Date', icon: Calendar },
     { type: 'email', label: 'Email', icon: Mail },
@@ -85,14 +93,12 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
         ...(q.options && { options: q.options.filter(opt => opt && opt.trim()) })
       }));
 
-      const surveyData = {
+      const surveyData: any = {
         title: surveyTitle.trim(),
         description: surveyDescription.trim() || '',
         category: surveyCategory,
         status: status,
-        isPrimary: status === 'active', // New surveys published are automatically primary
-        createdBy: 'admin', // Simplified for now
-        createdAt: serverTimestamp(),
+        isPrimary: status === 'active' && (!editingSurvey || editingSurvey.isPrimary), // Preserve primary status when editing
         updatedAt: serverTimestamp(),
         questions: cleanQuestions,
         settings: {
@@ -101,16 +107,22 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
           maxResponses: null
         },
         metadata: {
-          version: 1,
+          version: editingSurvey ? (editingSurvey.metadata?.version || 1) + 1 : 1,
           totalQuestions: cleanQuestions.length,
           isPublished: status === 'active'
         }
       };
 
+      // Only add createdAt and createdBy for new surveys
+      if (!editingSurvey) {
+        surveyData.createdBy = 'admin';
+        surveyData.createdAt = serverTimestamp();
+      }
+
       console.log('Saving survey with data:', surveyData);
       
-      // If publishing as active, make sure to unset isPrimary from other surveys
-      if (status === 'active') {
+      // If publishing as active and this is a new survey or changing an existing non-primary to primary
+      if (status === 'active' && (!editingSurvey || !editingSurvey.isPrimary)) {
         try {
           const existingSurveysQuery = query(
             collection(db, 'surveys'),
@@ -129,9 +141,19 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
         }
       }
       
-      const docRef = await addDoc(collection(db, 'surveys'), surveyData);
-      console.log('Survey created with ID:', docRef.id);
-      alert(`Survey ${status === 'draft' ? 'saved as draft' : 'published'} successfully!`);
+      if (editingSurvey) {
+        // Update existing survey
+        const surveyRef = doc(db, 'surveys', editingSurvey.id);
+        await updateDoc(surveyRef, surveyData);
+        console.log('Survey updated with ID:', editingSurvey.id);
+        alert(`Survey ${status === 'draft' ? 'saved as draft' : 'published'} successfully!`);
+      } else {
+        // Create new survey
+        const docRef = await addDoc(collection(db, 'surveys'), surveyData);
+        console.log('Survey created with ID:', docRef.id);
+        alert(`Survey ${status === 'draft' ? 'saved as draft' : 'published'} successfully!`);
+      }
+      
       onBack(); // Go back to survey management
     } catch (error) {
       console.error('Error saving survey:', error);
@@ -147,7 +169,15 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
       type,
       label: `New ${type} question`,
       required: false,
-      options: type === 'multiple-choice' ? ['Option 1', 'Option 2'] : undefined
+      options: type === 'multiple-choice' ? ['Option 1', 'Option 2'] : 
+               type === 'likert-scale' ? [
+                 'Strongly Disagree 😞',
+                 'Disagree 😕', 
+                 'Neither Agree nor Disagree 😐',
+                 'Agree 😊',
+                 'Strongly Agree 😍',
+                 'N/A'
+               ] : undefined
     };
     setQuestions([...questions, newQuestion]);
   };
@@ -173,8 +203,12 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
             <ArrowLeft className="w-6 h-6" />
           </button>
           <div>
-            <h1 className="text-white">Survey Form Builder</h1>
-            <p className="text-slate-400 mt-1">Create and customize your survey</p>
+            <h1 className="text-white">
+              {editingSurvey ? 'Edit Survey' : 'Survey Form Builder'}
+            </h1>
+            <p className="text-slate-400 mt-1">
+              {editingSurvey ? 'Modify your existing survey' : 'Create and customize your survey'}
+            </p>
           </div>
         </div>
         <div className="flex gap-3">
@@ -362,6 +396,36 @@ export function FormBuilder({ onBack }: FormBuilderProps) {
                             <Plus className="w-4 h-4" />
                             Add Option
                           </button>
+                        </div>
+                      )}
+
+                      {question.type === 'likert-scale' && question.options && (
+                        <div className="space-y-3">
+                          <p className="text-slate-400 text-sm">Likert Scale Options (with Emojis):</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            {question.options.map((option, optIndex) => (
+                              <div key={optIndex} className="flex items-center gap-2 bg-slate-800 p-3 rounded-lg">
+                                <span className="text-2xl">{option.split(' ')[option.split(' ').length - 1]}</span>
+                                <div className="flex-1">
+                                  <input
+                                    type="text"
+                                    value={option}
+                                    onChange={(e) => {
+                                      const updated = [...questions];
+                                      if (updated[index].options) {
+                                        updated[index].options![optIndex] = e.target.value;
+                                        setQuestions(updated);
+                                      }
+                                    }}
+                                    className="w-full px-2 py-1 bg-slate-700 text-white text-sm rounded border border-slate-600 focus:outline-none focus:border-red-500"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="text-xs text-slate-500 mt-2">
+                            ℹ️ Tip: Include emojis at the end of each option for visual feedback
+                          </div>
                         </div>
                       )}
 

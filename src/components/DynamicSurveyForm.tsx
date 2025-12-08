@@ -247,16 +247,15 @@ export default function DynamicSurveyForm({ onComplete }: DynamicSurveyFormProps
     return (
       <div className="bg-slate-800 rounded-lg shadow-2xl max-w-4xl mx-auto p-6 sm:p-8 text-white">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2">Survey Information</h2>
-          {selectedSurvey && (
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-blue-400">{selectedSurvey.title}</h3>
-              {selectedSurvey.description && (
-                <p className="text-gray-300 mt-1">{selectedSurvey.description}</p>
-              )}
-            </div>
+          <h2 className="text-2xl font-bold mb-2">
+            {selectedSurvey ? selectedSurvey.title : 'Survey Information'}
+          </h2>
+          {selectedSurvey && selectedSurvey.description && (
+            <p className="text-gray-300 mb-4">{selectedSurvey.description}</p>
           )}
-          <p className="text-gray-300">Please provide some basic information to get started.</p>
+          {(!selectedSurvey?.description || selectedSurvey.description.trim() === '') && (
+            <p className="text-gray-300">Please provide some basic information to get started.</p>
+          )}
         </div>
 
         <form onSubmit={handleDemographicsSubmit} className="space-y-6">
@@ -292,7 +291,18 @@ export default function DynamicSurveyForm({ onComplete }: DynamicSurveyFormProps
               <input
                 type="date"
                 value={demographics.date}
-                onChange={(e) => setDemographics(prev => ({ ...prev, date: e.target.value }))}
+                max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                onChange={(e) => {
+                  const selectedDate = e.target.value;
+                  const today = new Date().toISOString().split('T')[0];
+                  
+                  if (selectedDate > today) {
+                    alert('Please select a date that is today or in the past.');
+                    return;
+                  }
+                  
+                  setDemographics(prev => ({ ...prev, date: selectedDate }));
+                }}
                 required
                 className="w-full p-3 bg-slate-600 border border-slate-500 rounded-lg text-white focus:outline-none focus:border-blue-500"
               />
@@ -333,7 +343,7 @@ export default function DynamicSurveyForm({ onComplete }: DynamicSurveyFormProps
                 required
                 className="w-full p-3 bg-slate-600 border border-slate-500 rounded-lg text-white focus:outline-none focus:border-blue-500"
               >
-                <option value="">18-24</option>
+                <option value="">Select Age Range</option>
                 <option value="18-24">18-24</option>
                 <option value="25-34">25-34</option>
                 <option value="35-44">35-44</option>
@@ -462,6 +472,51 @@ export default function DynamicSurveyForm({ onComplete }: DynamicSurveyFormProps
                 <span className="text-white leading-relaxed">{index + 1}. {option}</span>
               </label>
             ))}
+          </div>
+        )}
+
+        {currentQuestion.type === 'likert-scale' && currentQuestion.options && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentQuestion.options.map((option, index) => {
+                const isSelected = answers[currentQuestion.id] === option;
+                const emoji = option.split(' ').pop() || '';
+                const text = option.replace(emoji, '').trim();
+                
+                return (
+                  <label 
+                    key={index} 
+                    className={`relative flex flex-col items-center p-6 bg-slate-700 border-2 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 ${
+                      isSelected 
+                        ? 'border-blue-500 bg-blue-600/20 shadow-lg shadow-blue-500/25' 
+                        : 'border-slate-600 hover:border-slate-500'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={currentQuestion.id}
+                      value={option}
+                      checked={isSelected}
+                      onChange={(e) => handleAnswerChange(currentQuestion.id, e.target.value)}
+                      className="sr-only"
+                    />
+                    <div className={`text-6xl mb-3 transition-transform duration-300 ${
+                      isSelected ? 'animate-bounce scale-110' : 'hover:scale-110'
+                    }`}>
+                      {emoji || '❔'}
+                    </div>
+                    <span className={`text-center font-medium transition-colors ${
+                      isSelected ? 'text-blue-300' : 'text-white'
+                    }`}>
+                      {text}
+                    </span>
+                    {isSelected && (
+                      <div className="absolute inset-0 rounded-xl border-2 border-blue-400 animate-pulse"></div>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
           </div>
         )}
 
