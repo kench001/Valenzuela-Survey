@@ -1,5 +1,5 @@
 import { Card } from './Card';
-import { Download, Filter, Calendar, TrendingUp, Users, Target, MapPin, RefreshCw, FileText, FileSpreadsheet, Activity, BarChart3, Map } from 'lucide-react';
+import { Download, Calendar, TrendingUp, Users, Target, MapPin, RefreshCw, FileText, FileSpreadsheet, Activity, BarChart3, Map } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { db } from '../../config/firebase';
 import { 
@@ -9,7 +9,7 @@ import {
   orderBy,
   Timestamp,
   onSnapshot,
-  where
+  // where
 } from 'firebase/firestore';
 import { ResponseMap } from './ResponseMap';
 import { QuestionAnalytics } from './QuestionAnalytics';
@@ -54,6 +54,7 @@ interface Survey {
   title: string;
   status: string;
   createdAt: Timestamp;
+  questions?: any[];
 }
 
 export function Analytics() {
@@ -69,11 +70,11 @@ export function Analytics() {
   const [mapMetric, setMapMetric] = useState<'responses' | 'satisfaction' | 'responseRate'>('responses');
   const [filters, setFilters] = useState({
     dateRange: { start: '', end: '' },
-    barangays: [],
-    ageGroups: [],
-    genders: [],
-    clientTypes: [],
-    surveyIds: []
+    barangays: [] as string[],
+    ageGroups: [] as string[],
+    genders: [] as string[],
+    clientTypes: [] as string[],
+    surveyIds: [] as string[],
   });
   const [stats, setStats] = useState({
     totalResponses: 0,
@@ -205,11 +206,11 @@ export function Analytics() {
     }
     
     if (filters.genders.length > 0) {
-      filtered = filtered.filter(r => filters.genders.includes(r.demographics?.sex || ''));
+      filtered = filtered.filter(r => filters.genders.includes(r.demographics?.gender || ''));
     }
     
     if (filters.clientTypes.length > 0) {
-      filtered = filtered.filter(r => filters.clientTypes.includes(r.demographics?.clientType || ''));
+      // filtered = filtered.filter(r => filters.clientTypes.includes(r.demographics?.clientType || ''));
     }
 
     if (filters.surveyIds.length > 0) {
@@ -459,33 +460,14 @@ export function Analytics() {
       'Age': response.demographics?.age || 'N/A',
       'Gender': response.demographics?.gender || 'N/A',
       'Barangay': response.demographics?.barangay || 'N/A',
-      'Client Type': response.demographics?.clientType || 'N/A',
-      'Service': response.demographics?.service || 'N/A',
+      // 'Client Type': response.demographics?.clientType || 'N/A',
+      // 'Service': response.demographics?.service || 'N/A',
       'Is Complete': response.isComplete ? 'Yes' : 'No',
       ...response.answers
     }));
     
     const csv = convertToCSV(csvData);
     downloadFile(csv, 'survey-responses.csv', 'text/csv');
-  };
-
-  const exportSummaryReport = () => {
-    const summaryData = {
-      'Generated At': new Date().toLocaleString(),
-      'Total Responses': stats.totalResponses,
-      'Today\'s Responses': stats.todayResponses,
-      'Response Rate': stats.responseRate,
-      'Active Locations': stats.activeLocations,
-      'Demographics': {
-        'Age Distribution': demographicData,
-        'Gender Distribution': genderData,
-        'Top Barangays': barangayData.slice(0, 5)
-      },
-      'Satisfaction Scores': satisfactionData
-    };
-    
-    const json = JSON.stringify(summaryData, null, 2);
-    downloadFile(json, 'analytics-summary.json', 'application/json');
   };
 
   const convertToCSV = (data: any[]) => {
@@ -626,15 +608,9 @@ export function Analytics() {
                 className="w-full px-4 py-2 text-left text-white hover:bg-slate-700 flex items-center gap-2"
               >
                 <FileSpreadsheet className="w-4 h-4" />
-                Export as CSV
+                Export Spreadsheet
               </button>
-              <button
-                onClick={exportSummaryReport}
-                className="w-full px-4 py-2 text-left text-white hover:bg-slate-700 flex items-center gap-2"
-              >
-                <FileText className="w-4 h-4" />
-                Summary Report
-              </button>
+             
               <button
                 onClick={generatePDFReport}
                 className="w-full px-4 py-2 text-left text-white hover:bg-slate-700 flex items-center gap-2 rounded-b-lg"
@@ -947,25 +923,16 @@ export function Analytics() {
                 </div>
                 <p className="text-slate-400">Full analytics report with charts</p>
               </button>
+              
               <button 
-                onClick={exportSummaryReport}
+                onClick={exportToCSV}
                 className="p-4 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-left"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span>Excel Export</span>
                   <Download className="w-5 h-5" />
                 </div>
-                <p className="text-slate-400">Raw data in spreadsheet format</p>
-              </button>
-              <button 
-                onClick={exportToCSV}
-                className="p-4 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors text-left"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span>CSV Export</span>
-                  <Download className="w-5 h-5" />
-                </div>
-                <p className="text-slate-400">Comma-separated values file</p>
+                <p className="text-slate-400">full spreadsheet file</p>
               </button>
             </div>
           </Card>

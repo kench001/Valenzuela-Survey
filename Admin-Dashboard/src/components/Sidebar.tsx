@@ -11,11 +11,10 @@ export function Sidebar({ currentPage, onNavigate, collapsed, onToggleCollapse }
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'surveys', label: 'Survey Management', icon: FileText },
-    { id: 'templates', label: 'Templates', icon: FileBox },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'users', label: 'User Management', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
+    // Templates and User Management removed
 
   return (
     <aside 

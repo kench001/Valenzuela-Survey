@@ -4,10 +4,10 @@ import { TopBar } from './components/TopBar';
 import { DashboardOverview } from './components/DashboardOverview';
 import { SurveyManagement } from './components/SurveyManagement';
 import { FormBuilder } from './components/FormBuilder';
-import { SurveyTemplates } from './components/SurveyTemplates';
+// import { SurveyTemplates } from './components/SurveyTemplates';
 import { Analytics } from './components/Analytics';
 import { Settings } from './components/Settings';
-import { UserManagement } from './components/UserManagement';
+// import { UserManagement } from './components/UserManagement';
 import AuthService, { AdminUser } from './services/authService';
 
 // Use the same logo from the main app
@@ -98,14 +98,14 @@ export default function App() {
         return <SurveyManagement onNavigate={setCurrentPage} />;
       case 'form-builder':
         return <FormBuilder onBack={() => setCurrentPage('surveys')} />;
-      case 'templates':
-        return <SurveyTemplates onNavigate={setCurrentPage} />;
+      // case 'templates':
+      //   return <SurveyTemplates onNavigate={setCurrentPage} />;
       case 'analytics':
         return <Analytics />;
       case 'settings':
         return <Settings onNavigate={setCurrentPage} />;
-      case 'users':
-        return <UserManagement />;
+      // case 'users':
+      //   return <UserManagement />;
       default:
         return <DashboardOverview />;
     }
